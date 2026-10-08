@@ -3,7 +3,12 @@ import mongoose from "mongoose";
 //read all project
 export const getProjects = async (req, res) => {
   try {
-    const projects = await Project.find();
+    const projects = await Project.find({
+      members: req.user._id,
+    })
+      .populate("owner", "name email role")
+      .populate("members", "name email role");
+
     res.status(200).json({
       success: true,
       projects,
@@ -30,6 +35,8 @@ export const createProject = async (req, res) => {
     const project = await Project.create({
       name,
       description,
+      owner: req.user._id,
+      members: [req.user._id],
     });
 
     res.status(201).json({
@@ -49,6 +56,7 @@ export const createProject = async (req, res) => {
 export const getProjectById = async (req, res) => {
   try {
     const { id } = req.params;
+
     if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({
         success: false,
@@ -56,7 +64,7 @@ export const getProjectById = async (req, res) => {
       });
     }
 
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findById(id);
 
     if (!project) {
       return res.status(404).json({
@@ -64,6 +72,20 @@ export const getProjectById = async (req, res) => {
         message: "Project not found",
       });
     }
+    //  Check whether logged-in user is a member
+    const isMember = project.members.some(
+      (memberId) => memberId.toString() === req.user.id.toString(),
+    );
+
+    //  User isn't a member
+    if (!isMember) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not a member of this project",
+      });
+    }
+
+    //  User is a member
     res.status(200).json({
       success: true,
       project,

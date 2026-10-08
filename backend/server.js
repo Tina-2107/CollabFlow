@@ -8,6 +8,8 @@ import connectDB from "./src/config/db.js";
 import healthRoutes from "./src/routes/healthRoutes.js";
 import projectRoutes from "./src/routes/projectRoutes.js";
 import testRoutes from "./src/routes/testRoutes.js";
+import authRoutes from "./src/routes/authRoutes.js";
+
 dotenv.config();
 
 const app = express();
@@ -17,17 +19,19 @@ app.use(express.json());
 
 //routes
 
+app.get("/", (req, res) => {
+  res.json({
+    message: "Collaborative Project Management API is running",
+  });
+});
+
 app.use("/api/health", healthRoutes);
 
 app.use("/api/projects", projectRoutes);
 
 app.use("/api/test", testRoutes);
 
-app.get("/", (req, res) => {
-  res.json({
-    message: "Collaborative Project Management API is running",
-  });
-});
+app.use("/api/auth", authRoutes);
 
 connectDB();
 

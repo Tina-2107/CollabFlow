@@ -20,7 +20,21 @@ const projectSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    //user
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    // users
+    members: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
+
   {
     timestamps: true,
   },
